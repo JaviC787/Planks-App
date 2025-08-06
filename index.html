@@ -20,29 +20,75 @@
       height: 100vh;
       color: #fff;
       text-shadow: 1px 1px 4px #000;
+      position: relative;
+      overflow: hidden;
     }
+
+    body.active-session::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      backdrop-filter: blur(4px);
+      z-index: -1;
+    }
+
     .container {
       background: rgba(0, 0, 0, 0.6);
       padding: 20px;
       border-radius: 10px;
       text-align: center;
       max-width: 500px;
+      position: relative;
+      z-index: 1;
     }
+
     h1 { margin-bottom: 10px; }
+
     #timer {
       font-size: 32px;
       margin: 15px 0;
     }
+
+    #timer.active {
+      animation: pulse 1s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%   { transform: scale(1); }
+      50%  { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
     #plankInfo {
       font-size: 22px;
       margin: 10px 0;
     }
+
+    /* Aqua Glow (active) */
+    #plankInfo.glow-aqua {
+      color: #0ff;
+      text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+    }
+
+    /* Red Glow (paused) */
+    #plankInfo.glow-red {
+      color: #ff4d4d;
+      text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff4d4d;
+    }
+
     #summary {
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
       margin-top: 15px;
       font-size: 18px;
       white-space: pre-line;
       text-align: left;
     }
+
+    #summary.show {
+      opacity: 1;
+    }
+
     button {
       padding: 10px 15px;
       margin: 5px;
@@ -50,10 +96,15 @@
       border: none;
       border-radius: 5px;
       cursor: pointer;
+      transition: transform 0.2s ease;
     }
-    button:hover { opacity: 0.85; }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
     .start { background-color: #28a745; color: white; }
-    .stop { background-color: #dc3545; color: white; }
+    .stop  { background-color: #dc3545; color: white; }
     .reset { background-color: #007bff; color: white; }
     .pause { background-color: #ffc107; color: black; }
   </style>
@@ -86,14 +137,18 @@
       elapsedSeconds = 0;
       updateDisplay();
 
-      // UI
+      // UI updates
+      document.body.classList.add("active-session");
       document.getElementById("startBtn").style.display = "none";
       document.getElementById("pauseBtn").style.display = "inline-block";
       document.getElementById("pauseBtn").textContent = "Pause";
       document.getElementById("stopBtn").style.display = "inline-block";
       document.getElementById("resetBtn").style.display = "none";
+      document.getElementById("summary").classList.remove("show");
       document.getElementById("summary").textContent = "";
-      document.getElementById("plankInfo").textContent = "Plank in progress...";
+      updatePlankInfo("Plank in progress...", "aqua");
+      document.getElementById("timer").classList.add("active");
+      document.getElementById("timer").style.display = "block";
 
       timerInterval = setInterval(() => {
         if (!isPaused) {
@@ -106,7 +161,16 @@
     function togglePause() {
       if (!isRunning) return;
       isPaused = !isPaused;
-      document.getElementById("pauseBtn").textContent = isPaused ? "Resume" : "Pause";
+
+      if (isPaused) {
+        document.getElementById("pauseBtn").textContent = "Resume";
+        updatePlankInfo("Plank Paused", "red");
+        document.getElementById("timer").classList.remove("active");
+      } else {
+        document.getElementById("pauseBtn").textContent = "Pause";
+        updatePlankInfo("Plank in progress...", "aqua");
+        document.getElementById("timer").classList.add("active");
+      }
     }
 
     function stopTimer() {
@@ -114,14 +178,19 @@
       isRunning = false;
       isPaused = false;
 
-      // UI
+      // UI updates
+      document.body.classList.remove("active-session");
       document.getElementById("pauseBtn").style.display = "none";
       document.getElementById("stopBtn").style.display = "none";
       document.getElementById("resetBtn").style.display = "inline-block";
+      document.getElementById("timer").classList.remove("active");
+      document.getElementById("timer").style.display = "none";
+      removePlankGlows();
 
       const summaryText = `Session complete! 🧘‍♂️\n\nTotal Plank Time: ${formatTime(elapsedSeconds)}`;
       document.getElementById("plankInfo").textContent = "Well done! See summary below.";
       document.getElementById("summary").textContent = summaryText;
+      document.getElementById("summary").classList.add("show");
     }
 
     function resetTimer() {
@@ -130,14 +199,32 @@
       isPaused = false;
       elapsedSeconds = 0;
 
-      // UI
+      // UI updates
+      document.body.classList.remove("active-session");
       document.getElementById("startBtn").style.display = "inline-block";
       document.getElementById("pauseBtn").style.display = "none";
       document.getElementById("stopBtn").style.display = "none";
       document.getElementById("resetBtn").style.display = "none";
+      document.getElementById("timer").classList.remove("active");
+      document.getElementById("timer").style.display = "block";
       document.getElementById("plankInfo").textContent = "Press Start to begin your plank";
+      removePlankGlows();
       document.getElementById("summary").textContent = "";
+      document.getElementById("summary").classList.remove("show");
+
       updateDisplay();
+    }
+
+    function updatePlankInfo(text, color) {
+      const plankInfo = document.getElementById("plankInfo");
+      plankInfo.textContent = text;
+      plankInfo.classList.remove("glow-aqua", "glow-red");
+      if (color === "aqua") plankInfo.classList.add("glow-aqua");
+      if (color === "red") plankInfo.classList.add("glow-red");
+    }
+
+    function removePlankGlows() {
+      document.getElementById("plankInfo").classList.remove("glow-aqua", "glow-red");
     }
 
     function updateDisplay() {
