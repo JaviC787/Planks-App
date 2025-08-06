@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Plank Trainer</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-image: url("Images/background.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      color: #fff;
+      text-shadow: 1px 1px 4px #000;
+    }
+    .container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 500px;
+    }
+    h1 { margin-bottom: 10px; }
+    #timer {
+      font-size: 32px;
+      margin: 15px 0;
+    }
+    #plankInfo {
+      font-size: 22px;
+      margin: 10px 0;
+    }
+    #summary {
+      margin-top: 15px;
+      font-size: 18px;
+      white-space: pre-line;
+      text-align: left;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover { opacity: 0.85; }
+    .start { background-color: #28a745; color: white; }
+    .stop { background-color: #dc3545; color: white; }
+    .reset { background-color: #007bff; color: white; }
+    .pause { background-color: #ffc107; color: black; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Plank Trainer</h1>
+    <div id="plankInfo">Press Start to begin your plank</div>
+    <div id="timer">0s</div>
+    <div>
+      <button class="start" id="startBtn" onclick="startTimer()">Start</button>
+      <button class="pause" id="pauseBtn" onclick="togglePause()" style="display:none;">Pause</button>
+      <button class="stop" id="stopBtn" onclick="stopTimer()" style="display:none;">Stop</button>
+      <button class="reset" id="resetBtn" onclick="resetTimer()" style="display:none;">Reset</button>
+    </div>
+    <div id="summary"></div>
+  </div>
+
+  <script>
+    let timerInterval;
+    let elapsedSeconds = 0;
+    let isRunning = false;
+    let isPaused = false;
+
+    function startTimer() {
+      if (isRunning) return;
+
+      isRunning = true;
+      isPaused = false;
+      elapsedSeconds = 0;
+      updateDisplay();
+
+      // UI
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("pauseBtn").style.display = "inline-block";
+      document.getElementById("pauseBtn").textContent = "Pause";
+      document.getElementById("stopBtn").style.display = "inline-block";
+      document.getElementById("resetBtn").style.display = "none";
+      document.getElementById("summary").textContent = "";
+      document.getElementById("plankInfo").textContent = "Plank in progress...";
+
+      timerInterval = setInterval(() => {
+        if (!isPaused) {
+          elapsedSeconds++;
+          updateDisplay();
+        }
+      }, 1000);
+    }
+
+    function togglePause() {
+      if (!isRunning) return;
+      isPaused = !isPaused;
+      document.getElementById("pauseBtn").textContent = isPaused ? "Resume" : "Pause";
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      isPaused = false;
+
+      // UI
+      document.getElementById("pauseBtn").style.display = "none";
+      document.getElementById("stopBtn").style.display = "none";
+      document.getElementById("resetBtn").style.display = "inline-block";
+
+      const summaryText = `Session complete! 🧘‍♂️\n\nTotal Plank Time: ${formatTime(elapsedSeconds)}`;
+      document.getElementById("plankInfo").textContent = "Well done! See summary below.";
+      document.getElementById("summary").textContent = summaryText;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      isRunning = false;
+      isPaused = false;
+      elapsedSeconds = 0;
+
+      // UI
+      document.getElementById("startBtn").style.display = "inline-block";
+      document.getElementById("pauseBtn").style.display = "none";
+      document.getElementById("stopBtn").style.display = "none";
+      document.getElementById("resetBtn").style.display = "none";
+      document.getElementById("plankInfo").textContent = "Press Start to begin your plank";
+      document.getElementById("summary").textContent = "";
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      document.getElementById("timer").textContent = formatTime(elapsedSeconds);
+    }
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = seconds % 60;
+      return `${min > 0 ? min + "m " : ""}${sec}s`;
+    }
+  </script>
+</body>
+</html>
