@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Plank Trainer</title>
+
+  <!-- 🧩 PWA Manifest & Theme -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0ff" />
+
+  <!-- 🔧 Register service worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('✅ Service Worker registered!', reg))
+        .catch(err => console.error('❌ Service Worker registration failed:', err));
+    }
+  </script>
+
   <style>
     body {
       margin: 0;
@@ -64,13 +78,11 @@
       margin: 10px 0;
     }
 
-    /* Aqua Glow (active) */
     #plankInfo.glow-aqua {
       color: #0ff;
       text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
     }
 
-    /* Red Glow (paused) */
     #plankInfo.glow-red {
       color: #ff4d4d;
       text-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff4d4d;
@@ -137,7 +149,6 @@
       elapsedSeconds = 0;
       updateDisplay();
 
-      // UI updates
       document.body.classList.add("active-session");
       document.getElementById("startBtn").style.display = "none";
       document.getElementById("pauseBtn").style.display = "inline-block";
@@ -178,7 +189,6 @@
       isRunning = false;
       isPaused = false;
 
-      // UI updates
       document.body.classList.remove("active-session");
       document.getElementById("pauseBtn").style.display = "none";
       document.getElementById("stopBtn").style.display = "none";
@@ -199,7 +209,6 @@
       isPaused = false;
       elapsedSeconds = 0;
 
-      // UI updates
       document.body.classList.remove("active-session");
       document.getElementById("startBtn").style.display = "inline-block";
       document.getElementById("pauseBtn").style.display = "none";
